@@ -1,10 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-hot-toast";
-import api from "@/lib/api";
+import api, { setLogoutFunction } from "@/lib/api";
 import Cookies from "js-cookie";
 
 type User = {
@@ -29,6 +35,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const logout = useCallback(() => {
+    console.log("AuthContext - Logging out");
+    Cookies.remove("token");
+    setUser(null);
+    delete api.defaults.headers.common["Authorization"];
+    router.push("/login");
+  }, [router]);
+
+  // Registra a função de logout para o interceptor do axios
+  useEffect(() => {
+    setLogoutFunction(() => {
+      console.log("Logout chamado pelo interceptor (token expirado)");
+      logout();
+    });
+  }, [router, logout]);
+
   // Initialize auth state from token
   useEffect(() => {
     console.log("AuthContext - Initializing auth state");
@@ -52,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             Cookies.remove("token");
             delete api.defaults.headers.common["Authorization"];
             setUser(null);
-            toast.error("Sessão expirada. Faça login novamente.");
+            router.push("/login");
           }
         } else {
           console.log("AuthContext - No token found");
@@ -65,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
-  }, []);
+  }, [router]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -118,16 +140,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const logout = () => {
-    console.log("AuthContext - Logging out");
-    Cookies.remove("token");
-    setUser(null);
-    delete api.defaults.headers.common["Authorization"];
-
-    router.push("/login");
-    toast.success("Você foi deslogado com sucesso!");
   };
 
   const authValue = {

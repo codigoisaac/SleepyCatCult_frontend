@@ -1,5 +1,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toast } from "react-hot-toast";
+
+// Vamos criar uma função para lidar com o logout que será usada pelo interceptor
+let logoutFunction: (() => void) | null = null;
+
+export const setLogoutFunction = (fn: () => void) => {
+  logoutFunction = fn;
+};
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
@@ -8,6 +16,7 @@ const api = axios.create({
   },
 });
 
+// Interceptor de requisição para adicionar o token
 api.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
@@ -17,6 +26,33 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor de resposta para tratar erros de autenticação
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Verifica se é um erro 401 (Unauthorized)
+    if (error.response?.status === 401) {
+      // Remove o token
+      Cookies.remove("token");
+      delete api.defaults.headers.common["Authorization"];
+
+      // Mostra um toast de sessão expirada que permanece até o usuário fechar
+      toast.error("Sua sessão expirou. Por favor, faça login novamente.", {
+        duration: 7000,
+        id: "session-expired", // ID único para evitar toasts duplicados
+      });
+
+      // Executa a função de logout se estiver definida
+      if (logoutFunction) {
+        logoutFunction();
+      }
+    }
     return Promise.reject(error);
   }
 );
