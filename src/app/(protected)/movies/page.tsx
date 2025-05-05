@@ -155,13 +155,14 @@ export default function MoviesPage() {
       </header>
 
       <div className="flex justify-between items-center mb-6">
+        {/* Search */}
         <form
           onSubmit={handleSearch}
           className="flex w-full max-w-sm items-center space-x-2"
         >
           <Input
             type="search"
-            placeholder="Search movies..."
+            placeholder="Procurar filmes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -169,108 +170,35 @@ export default function MoviesPage() {
             <Search className="h-4 w-4" />
           </Button>
         </form>
+
+        {/* Filter button */}
         <div className="flex gap-2">
           <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Filter className="h-4 w-4 mr-2" />
-                Filter
+                Filtrar
               </Button>
             </DialogTrigger>
+
+            {/* Dialog content */}
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Filter Movies</DialogTitle>
+                <DialogTitle>Filtrar filmes</DialogTitle>
               </DialogHeader>
               <Form {...filterForm}>
                 <form
                   onSubmit={filterForm.handleSubmit(applyFilters)}
                   className="space-y-4"
                 >
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={filterForm.control}
-                      name="durationMin"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min Runtime (min)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              {...field}
-                              value={field.value || ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
-                                )
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={filterForm.control}
-                      name="durationMax"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Max Runtime (min)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="300"
-                              {...field}
-                              value={field.value || ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
-                                )
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={filterForm.control}
-                      name="releaseDateMin"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>From Date</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={filterForm.control}
-                      name="releaseDateMax"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>To Date</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+                  {/* Score */}
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={filterForm.control}
                       name="scoreMin"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Min Score</FormLabel>
+                          <FormLabel>Nota mínima</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -296,7 +224,7 @@ export default function MoviesPage() {
                       name="scoreMax"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Max Score</FormLabel>
+                          <FormLabel>Nota máxima</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -319,15 +247,95 @@ export default function MoviesPage() {
                     />
                   </div>
 
+                  {/* Release date */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={filterForm.control}
+                      name="releaseDateMin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de lançamento mínima</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={filterForm.control}
+                      name="releaseDateMax"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de lançamento máxima</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Duration */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={filterForm.control}
+                      name="durationMin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duração mínima (em minutos)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? Number(e.target.value) : ""
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={filterForm.control}
+                      name="durationMax"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duração máxima (em minutos)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="300"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? Number(e.target.value) : ""
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <div className="flex justify-between pt-4">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={resetFilters}
                     >
-                      Reset
+                      Resetar filtros
                     </Button>
-                    <Button type="submit">Apply Filters</Button>
+                    <Button type="submit">Aplicar filtros</Button>
                   </div>
                 </form>
               </Form>

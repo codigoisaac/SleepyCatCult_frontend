@@ -8,11 +8,18 @@ type MovieCardProps = {
     id: number;
     title: string;
     releaseDate: string;
-    coverImage?: string;
-    score?: number;
+    coverImage: string;
+    score: number;
+    duration: number;
   };
   onClick: () => void;
 };
+
+function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours}h${remainingMinutes.toString().padStart(2, "0")}m`;
+}
 
 export function MovieCard({ movie, onClick }: MovieCardProps) {
   return (
@@ -50,7 +57,8 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
         <div>
           <h3 className="font-semibold truncate">{movie.title}</h3>
           <p className="text-sm text-muted-foreground">
-            {format(new Date(movie.releaseDate), "yyyy")}
+            {format(new Date(movie.releaseDate), "dd/MMyyyy")} •{" "}
+            {formatDuration(movie.duration)}
           </p>
         </div>
       </CardContent>
