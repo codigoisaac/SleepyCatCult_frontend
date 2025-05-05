@@ -32,6 +32,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  console.log("login", { login, isLoading });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -45,8 +46,6 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       await login(data.email, data.password);
-    } catch (error) {
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

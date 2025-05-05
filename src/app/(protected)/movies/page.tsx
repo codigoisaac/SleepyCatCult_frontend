@@ -47,7 +47,7 @@ type Movie = {
 type FilterFormValues = z.infer<typeof filterSchema>;
 
 export default function MoviesPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,11 +69,8 @@ export default function MoviesPage() {
     },
   });
 
+  // No more auth checks - middleware handles this
   useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
     const fetchMovies = async () => {
       try {
         setLoading(true);
@@ -92,16 +89,16 @@ export default function MoviesPage() {
     };
 
     fetchMovies();
-  }, [isAuthenticated, currentPage, searchQuery, activeFilters]);
+  }, [currentPage, searchQuery, activeFilters]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const applyFilters = (data: FilterFormValues) => {
     setActiveFilters(data);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
     setFilterOpen(false);
   };
 
@@ -111,10 +108,6 @@ export default function MoviesPage() {
     setCurrentPage(1);
     setFilterOpen(false);
   };
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="container mx-auto py-6">

@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-hot-toast";
+import api from "@/lib/api";
+import Cookies from "js-cookie";
 
 type User = {
   id: string;
@@ -28,39 +29,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Initialize auth state from token
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    console.log("AuthContext - Initializing auth state");
+
+    const initAuth = async () => {
       try {
-        const decoded = jwtDecode<{ user: User }>(token);
-        setUser(decoded.user);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      } catch (error) {
-        console.error("Token validation failed:", error);
-        localStorage.removeItem("token");
-        // Optionally show a toast notification
-        toast.error("Session expired. Please log in again.");
+        const token = Cookies.get("token");
+        console.log("AuthContext - Token exists:", !!token);
+
+        if (token) {
+          try {
+            console.log("AuthContext - Decoding token");
+            const decoded = jwtDecode<{ user: User }>(token);
+            console.log("AuthContext - Token decoded successfully");
+
+            setUser(decoded.user);
+            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            console.log("AuthContext - User set from token:", decoded.user);
+          } catch (error) {
+            console.error("AuthContext - Token validation failed:", error);
+            Cookies.remove("token");
+            delete api.defaults.headers.common["Authorization"];
+            setUser(null);
+            toast.error("Sessão expirada. Faça login novamente.");
+          }
+        } else {
+          console.log("AuthContext - No token found");
+          setUser(null);
+        }
+      } finally {
+        console.log("AuthContext - Auth initialization complete");
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
+      console.log("AuthContext - Attempting login");
       setLoading(true);
-      const response = await axios.post("/api/auth/login", { email, password });
-      const { token } = response.data;
-      localStorage.setItem("token", token);
+
+      const response = await api.post("/auth/login", { email, password });
+      const token = response.data.accessToken;
+      console.log("AuthContext - Login successful, token received");
+
+      Cookies.set("token", token, {
+        expires: 7,
+        path: "/",
+        sameSite: "strict",
+      });
+      console.log("AuthContext - Token saved to cookies");
 
       const decoded = jwtDecode<{ user: User }>(token);
       setUser(decoded.user);
+      console.log("AuthContext - User set from login:", decoded.user);
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      toast.success("Login successful!");
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      toast.success("Você está logado. Bem-vindo!");
+
+      console.log("AuthContext - Redirecting to movies after login");
       router.push("/movies");
     } catch (error) {
-      console.error("Login failed:", error);
-      toast.error("Invalid credentials");
+      console.error("AuthContext - Login failed:", error);
+      toast.error("Credenciais inválidas");
       throw error;
     } finally {
       setLoading(false);
@@ -69,13 +103,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (name: string, email: string, password: string) => {
     try {
+      console.log("AuthContext - Attempting registration");
       setLoading(true);
-      await axios.post("/api/auth/register", { name, email, password });
-      toast.success("Registration successful! Please login.");
+
+      await api.post("/auth/register", { name, email, password });
+      console.log("AuthContext - Registration successful");
+
+      toast.success("Cadastro realizado com sucesso! Faça login.");
       router.push("/login");
     } catch (error) {
-      console.error("Registration failed:", error);
-      toast.error("Registration failed");
+      console.error("AuthContext - Registration failed:", error);
+      toast.error("Falha ao registrar");
       throw error;
     } finally {
       setLoading(false);
@@ -83,26 +121,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    console.log("AuthContext - Logging out");
+    Cookies.remove("token");
     setUser(null);
-    delete axios.defaults.headers.common["Authorization"];
+    delete api.defaults.headers.common["Authorization"];
+
     router.push("/login");
-    toast.success("Logged out successfully");
+    toast.success("Você foi deslogado com sucesso!");
   };
 
+  const authValue = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    isAuthenticated: !!user,
+  };
+
+  console.log("AuthContext - Current state:", {
+    isAuthenticated: !!user,
+    loading,
+    userExists: !!user,
+  });
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!user,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
   );
 }
 
