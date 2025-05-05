@@ -5,10 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 type MovieCardProps = {
   movie: {
-    id: string;
+    id: number;
     title: string;
     releaseDate: string;
-    posterUrl?: string;
+    coverImage?: string;
     score?: number;
   };
   onClick: () => void;
@@ -21,9 +21,9 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       onClick={onClick}
     >
       <div className="relative aspect-[2/3] w-full bg-muted">
-        {movie.posterUrl ? (
+        {movie.coverImage ? (
           <Image
-            src={movie.posterUrl}
+            src={movie.coverImage}
             alt={movie.title}
             fill
             className="object-cover"

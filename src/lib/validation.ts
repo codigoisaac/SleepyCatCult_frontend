@@ -35,10 +35,10 @@ export const movieSchema = z.object({
 });
 
 export const filterSchema = z.object({
-  minRuntime: z.union([z.number().positive(), z.null()]).optional(),
-  maxRuntime: z.union([z.number().positive(), z.null()]).optional(),
-  minReleaseDate: z.string().optional(),
-  maxReleaseDate: z.string().optional(),
-  minScore: z.union([z.number().min(0).max(10), z.null()]).optional(),
-  maxScore: z.union([z.number().min(0).max(10), z.null()]).optional(),
+  durationMin: z.number().nullable().optional(),
+  durationMax: z.number().nullable().optional(),
+  releaseDateMin: z.string().optional(),
+  releaseDateMax: z.string().optional(),
+  scoreMin: z.number().min(0).max(10).nullable().optional(),
+  scoreMax: z.number().min(0).max(10).nullable().optional(),
 });

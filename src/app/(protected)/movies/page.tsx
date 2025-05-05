@@ -32,16 +32,29 @@ import { Pagination } from "@/components/ui/pagination";
 import { UserNav } from "@/components/layout/user-nav";
 import { z } from "zod";
 
+// Update the Movie type to match the API response
 type Movie = {
-  id: string;
+  id: number;
   title: string;
-  originalTitle?: string;
+  originalTitle: string;
   releaseDate: string;
-  overview: string;
-  posterUrl?: string;
-  budget?: number;
-  runtime?: number;
-  score?: number;
+  synopsis: string;
+  coverImage: string;
+  budget: number;
+  duration: number;
+  score: number;
+  userId: number;
+  popularity: number;
+  voteCount: number;
+  tagline: string;
+  genres: string[];
+  status: string;
+  language: string;
+  revenue: number;
+  profit: number;
+  trailerUrl: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type FilterFormValues = z.infer<typeof filterSchema>;
@@ -60,29 +73,51 @@ export default function MoviesPage() {
   const filterForm = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
     defaultValues: {
-      minRuntime: null,
-      maxRuntime: null,
-      minReleaseDate: "",
-      maxReleaseDate: "",
-      minScore: null,
-      maxScore: null,
+      durationMin: null,
+      durationMax: null,
+      releaseDateMin: "",
+      releaseDateMax: "",
+      scoreMin: null,
+      scoreMax: null,
     },
   });
 
-  // No more auth checks - middleware handles this
   useEffect(() => {
     const fetchMovies = async () => {
       try {
         setLoading(true);
-        const response = await movieService.getAll(
-          currentPage,
-          searchQuery,
-          activeFilters
-        );
-        setMovies(response.data.movies);
-        setTotalPages(response.data.totalPages);
+        const response = await movieService.getAll({
+          paginationPage: currentPage,
+          search: searchQuery,
+          ...activeFilters,
+        });
+
+        // Check if response.data contains movies directly or nested
+        // Handle both cases: response.data.movies or response.data as the array
+        const moviesData = Array.isArray(response.data)
+          ? response.data
+          : response.data.movies;
+
+        if (Array.isArray(moviesData)) {
+          setMovies(moviesData);
+
+          // If totalPages is provided, use it, otherwise calculate
+          if (response.data.totalPages) {
+            setTotalPages(response.data.totalPages);
+          } else {
+            // Assuming 10 per page if not provided
+            const total = Array.isArray(response.data)
+              ? response.data.length
+              : 0;
+            setTotalPages(Math.ceil(total / 10));
+          }
+        } else {
+          console.error("Unexpected response format:", response.data);
+          setMovies([]);
+        }
       } catch (error) {
         console.error("Error fetching movies:", error);
+        setMovies([]);
       } finally {
         setLoading(false);
       }
@@ -154,7 +189,7 @@ export default function MoviesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={filterForm.control}
-                      name="minRuntime"
+                      name="durationMin"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Min Runtime (min)</FormLabel>
@@ -177,7 +212,7 @@ export default function MoviesPage() {
                     />
                     <FormField
                       control={filterForm.control}
-                      name="maxRuntime"
+                      name="durationMax"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Max Runtime (min)</FormLabel>
@@ -203,7 +238,7 @@ export default function MoviesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={filterForm.control}
-                      name="minReleaseDate"
+                      name="releaseDateMin"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>From Date</FormLabel>
@@ -216,7 +251,7 @@ export default function MoviesPage() {
                     />
                     <FormField
                       control={filterForm.control}
-                      name="maxReleaseDate"
+                      name="releaseDateMax"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>To Date</FormLabel>
@@ -232,7 +267,7 @@ export default function MoviesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={filterForm.control}
-                      name="minScore"
+                      name="scoreMin"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Min Score</FormLabel>
@@ -258,7 +293,7 @@ export default function MoviesPage() {
                     />
                     <FormField
                       control={filterForm.control}
-                      name="maxScore"
+                      name="scoreMax"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Max Score</FormLabel>
@@ -315,7 +350,7 @@ export default function MoviesPage() {
             ></div>
           ))}
         </div>
-      ) : movies.length > 0 ? (
+      ) : movies?.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {movies.map((movie) => (
