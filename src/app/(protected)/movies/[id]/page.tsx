@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { UserNav } from "@/components/layout/user-nav";
+import { MovieDialog } from "@/components/movies/movie-dialog";
 
 export default function MovieDetailPage() {
   const { id: movieId } = useParams<{ id: string }>();
@@ -37,6 +38,7 @@ export default function MovieDetailPage() {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -154,7 +156,7 @@ export default function MovieDetailPage() {
                 variant="outline"
                 size="sm"
                 className="cursor-pointer"
-                onClick={() => router.push(`/movies/edit/${movie.id}`)}
+                onClick={() => setEditDialogOpen(true)}
               >
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
@@ -250,6 +252,13 @@ export default function MovieDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <MovieDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        movie={movie}
+        mode="edit"
+      />
     </div>
   );
 }
