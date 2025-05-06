@@ -1,8 +1,6 @@
 "use client";
 
-import { Movie } from "@/types/movie";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -16,11 +14,35 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { movieService } from "@/lib/api";
+import { Movie, MovieForm } from "@/types/movie";
+
 interface MovieDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   movie?: Movie;
   mode: "create" | "edit";
+}
+
+function formatMoneyToWords(amount: number): string {
+  if (!amount) return "";
+
+  const billion = 1000000000;
+  const million = 1000000;
+  const thousand = 1000;
+
+  if (amount >= billion) {
+    const billions = Math.floor(amount / billion);
+    return `${billions} billion + dollars`;
+  } else if (amount >= million) {
+    const millions = Math.floor(amount / million);
+    return `${millions} million + dollars`;
+  } else if (amount >= thousand) {
+    const thousands = Math.floor(amount / thousand);
+    return `${thousands} thousand + dollars`;
+  }
+
+  return `${amount} dollars`;
 }
 
 export function MovieDialog({
@@ -29,58 +51,55 @@ export function MovieDialog({
   movie,
   mode,
 }: MovieDialogProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [budget, setBudget] = useState(movie?.budget?.toString() || "");
+  const [revenue, setRevenue] = useState(movie?.revenue?.toString() || "");
+  const [profit, setProfit] = useState(movie?.profit?.toString() || "");
+  const [movieData, setMovieData] = useState(movie);
+
+  const handleMoneyChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (value: string) => void,
+  ) => {
+    const rawValue = e.target.value.replace(/[^\d]/g, "");
+    setter(rawValue);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
-      const data = {
-        title: formData.get("title"),
-        originalTitle: formData.get("originalTitle"),
+
+      const data: MovieForm = {
+        title: formData.get("title")?.toString() || "",
+        originalTitle: formData.get("originalTitle")?.toString() || "",
         popularity: Number(formData.get("popularity")),
-        voteCount: Number(
-          formData.get("voteCount")?.toString().replace(/\D/g, ""),
-        ),
-        budget: Number(
-          formData.get("budget")?.toString().replace(/[^\d]/g, ""),
-        ),
-        revenue: Number(
-          formData.get("revenue")?.toString().replace(/[^\d]/g, ""),
-        ),
-        profit: Number(
-          formData.get("profit")?.toString().replace(/[^\d]/g, ""),
-        ),
+        voteCount: Number(formData.get("voteCount")),
+        budget: Number(formData.get("budget")),
+        revenue: Number(formData.get("revenue")),
+        profit: Number(formData.get("profit")),
         score: Number(formData.get("score")),
-        tagline: formData.get("tagline"),
-        synopsis: formData.get("synopsis"),
-        genres: formData
-          .get("genres")
-          ?.toString()
+        tagline: formData.get("tagline")?.toString() || "",
+        synopsis: formData.get("synopsis")?.toString() || "",
+        genres: (formData.get("genres")?.toString() || "")
           .split(",")
-          .map((g) => g.trim()),
-        releaseDate: formData.get("releaseDate"),
+          .map((g) => g.trim())
+          .filter(Boolean),
+        releaseDate: formData.get("releaseDate")?.toString() || "",
         duration: Number(formData.get("duration")),
-        status: formData.get("status"),
-        language: formData.get("language"),
-        trailerUrl: formData.get("trailerUrl"),
+        status: formData.get("status")?.toString() || "",
+        language: formData.get("language")?.toString() || "",
+        trailerUrl: formData.get("trailerUrl")?.toString() || "",
       };
 
-      const url =
-        mode === "create" ? "/api/movies" : `/api/movies/${movie?.id}`;
-      const method = mode === "create" ? "POST" : "PATCH";
+      if (mode === "create") {
+        await movieService.create(data);
+      } else {
+        const updatedMovie = await movieService.update(movie!.id, data);
+        setMovieData(updatedMovie.data);
+      }
 
-      await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      router.refresh();
       onOpenChange(false);
     } catch (error) {
       console.error(`Failed to ${mode} movie:`, error);
@@ -109,7 +128,7 @@ export function MovieDialog({
               <Input
                 id="title"
                 name="title"
-                defaultValue={movie?.title}
+                defaultValue={movieData?.title}
                 required
               />
             </div>
@@ -118,14 +137,18 @@ export function MovieDialog({
               <Input
                 id="originalTitle"
                 name="originalTitle"
-                defaultValue={movie?.originalTitle}
+                defaultValue={movieData?.originalTitle}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="tagline">Tagline</Label>
-            <Input id="tagline" name="tagline" defaultValue={movie?.tagline} />
+            <Input
+              id="tagline"
+              name="tagline"
+              defaultValue={movieData?.tagline}
+            />
           </div>
 
           <div className="space-y-2">
@@ -133,7 +156,7 @@ export function MovieDialog({
             <Input
               id="genres"
               name="genres"
-              defaultValue={movie?.genres.join(", ")}
+              defaultValue={movieData?.genres.join(", ")}
             />
           </div>
 
@@ -142,7 +165,7 @@ export function MovieDialog({
             <Textarea
               id="synopsis"
               name="synopsis"
-              defaultValue={movie?.synopsis}
+              defaultValue={movieData?.synopsis}
               className="h-20"
               maxLength={1000}
             />
@@ -155,7 +178,7 @@ export function MovieDialog({
                 type="number"
                 id="popularity"
                 name="popularity"
-                defaultValue={movie?.popularity}
+                defaultValue={movieData?.popularity}
                 step="0.1"
               />
             </div>
@@ -166,8 +189,10 @@ export function MovieDialog({
                 id="voteCount"
                 name="voteCount"
                 defaultValue={
-                  movie?.voteCount
-                    ? movie.voteCount.toLocaleString("en-US").replace(/,/g, ".")
+                  movieData?.voteCount
+                    ? movieData.voteCount
+                        .toLocaleString("en-US")
+                        .replace(/,/g, ".")
                     : ""
                 }
                 onChange={(e) => {
@@ -184,9 +209,10 @@ export function MovieDialog({
                 type="number"
                 id="score"
                 name="score"
-                defaultValue={movie?.score}
+                defaultValue={movieData?.score}
                 min="0"
                 max="100"
+                step="1"
               />
             </div>
             <div className="space-y-2">
@@ -195,7 +221,7 @@ export function MovieDialog({
                 type="date"
                 id="releaseDate"
                 name="releaseDate"
-                defaultValue={movie?.releaseDate?.split("T")[0]}
+                defaultValue={movieData?.releaseDate?.split("T")[0]}
                 onFocus={(e) => (e.target.type = "date")}
                 onBlur={(e) => {
                   e.target.type = "text";
@@ -215,20 +241,24 @@ export function MovieDialog({
                 type="number"
                 id="duration"
                 name="duration"
-                defaultValue={movie?.duration}
+                defaultValue={movieData?.duration}
                 min="1"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Input id="status" name="status" defaultValue={movie?.status} />
+              <Input
+                id="status"
+                name="status"
+                defaultValue={movieData?.status}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="language">Language</Label>
               <Input
                 id="language"
                 name="language"
-                defaultValue={movie?.language}
+                defaultValue={movieData?.language}
               />
             </div>
           </div>
@@ -240,22 +270,16 @@ export function MovieDialog({
                 type="text"
                 id="budget"
                 name="budget"
-                defaultValue={
-                  movie?.budget
-                    ? `U$ ${movie.budget
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : ""
-                }
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d]/g, "");
-                  e.target.value = value
-                    ? `U$ ${parseInt(value)
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : "";
-                }}
+                onChange={(e) => handleMoneyChange(e, setBudget)}
+                maxLength={15}
+                defaultValue={movieData?.budget}
               />
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyDisplay(budget)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyToWords(Number(budget || 0))}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="revenue">Revenue</Label>
@@ -263,22 +287,16 @@ export function MovieDialog({
                 type="text"
                 id="revenue"
                 name="revenue"
-                defaultValue={
-                  movie?.revenue
-                    ? `U$ ${movie.revenue
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : ""
-                }
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d]/g, "");
-                  e.target.value = value
-                    ? `U$ ${parseInt(value)
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : "";
-                }}
+                onChange={(e) => handleMoneyChange(e, setRevenue)}
+                maxLength={15}
+                defaultValue={movieData?.revenue}
               />
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyDisplay(revenue)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyToWords(Number(revenue || 0))}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="profit">Profit</Label>
@@ -286,22 +304,16 @@ export function MovieDialog({
                 type="text"
                 id="profit"
                 name="profit"
-                defaultValue={
-                  movie?.profit
-                    ? `U$ ${movie.profit
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : ""
-                }
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d]/g, "");
-                  e.target.value = value
-                    ? `U$ ${parseInt(value)
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")},00`
-                    : "";
-                }}
+                onChange={(e) => handleMoneyChange(e, setProfit)}
+                maxLength={15}
+                defaultValue={movieData?.profit}
               />
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyDisplay(profit)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formatMoneyToWords(Number(profit || 0))}
+              </p>
             </div>
           </div>
 
@@ -311,7 +323,7 @@ export function MovieDialog({
               id="trailerUrl"
               name="trailerUrl"
               type="url"
-              defaultValue={movie?.trailerUrl}
+              defaultValue={movieData?.trailerUrl}
             />
           </div>
 
@@ -321,10 +333,15 @@ export function MovieDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="cursor-pointer"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="cursor-pointer"
+            >
               {isSubmitting
                 ? "Saving..."
                 : mode === "create"
@@ -337,3 +354,12 @@ export function MovieDialog({
     </Dialog>
   );
 }
+
+const formatMoneyDisplay = (value: string) => {
+  if (!value) return "";
+  const numericValue = parseInt(value);
+  return `U$ ${numericValue.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};

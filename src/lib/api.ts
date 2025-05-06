@@ -1,6 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-hot-toast";
+import { MovieForm } from "@/types/movie";
 
 // Vamos criar uma função para lidar com o logout que será usada pelo interceptor
 let logoutFunction: (() => void) | null = null;
@@ -106,9 +107,9 @@ export const movieService = {
       });
   },
   getById: (id: string | number) => api.get(`/movies/${id}`),
-  create: (data: FormData) => api.post("/movies", data),
-  update: (id: string | number, data: FormData) =>
-    api.put(`/movies/${id}`, data),
+  create: (data: MovieForm) => api.post("/movies", data),
+  update: (id: string | number, data: MovieForm) =>
+    api.patch(`/movies/${id}`, data),
   delete: (id: string | number) => api.delete(`/movies/${id}`),
 };
 

@@ -1,14 +1,11 @@
-export type Movie = {
-  id: number;
+export type MovieForm = {
   title: string;
   originalTitle: string;
   releaseDate: string;
   synopsis: string;
-  coverImage: string;
   budget: number;
   duration: number;
   score: number;
-  userId: number;
   popularity: number;
   voteCount: number;
   tagline: string;
@@ -18,6 +15,12 @@ export type Movie = {
   revenue: number;
   profit: number;
   trailerUrl: string;
+};
+
+export type Movie = MovieForm & {
+  id: number;
+  userId: number;
+  coverImage: string;
   createdAt: string;
   updatedAt: string;
 };
