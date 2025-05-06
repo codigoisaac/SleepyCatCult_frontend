@@ -257,6 +257,7 @@ export default function MovieDetailPage() {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         movie={movie}
+        setMovie={setMovie}
         mode="edit"
       />
     </div>

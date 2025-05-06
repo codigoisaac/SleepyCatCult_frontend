@@ -21,6 +21,7 @@ interface MovieDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   movie?: Movie;
+  setMovie?: (movie: Movie) => void;
   mode: "create" | "edit";
 }
 
@@ -49,13 +50,13 @@ export function MovieDialog({
   open,
   onOpenChange,
   movie,
+  setMovie,
   mode,
 }: MovieDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [budget, setBudget] = useState(movie?.budget?.toString() || "");
   const [revenue, setRevenue] = useState(movie?.revenue?.toString() || "");
   const [profit, setProfit] = useState(movie?.profit?.toString() || "");
-  const [movieData, setMovieData] = useState(movie);
 
   const handleMoneyChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -97,7 +98,7 @@ export function MovieDialog({
         await movieService.create(data);
       } else {
         const updatedMovie = await movieService.update(movie!.id, data);
-        setMovieData(updatedMovie.data);
+        setMovie?.(updatedMovie.data);
       }
 
       onOpenChange(false);
@@ -128,7 +129,7 @@ export function MovieDialog({
               <Input
                 id="title"
                 name="title"
-                defaultValue={movieData?.title}
+                defaultValue={movie?.title}
                 required
               />
             </div>
@@ -137,18 +138,14 @@ export function MovieDialog({
               <Input
                 id="originalTitle"
                 name="originalTitle"
-                defaultValue={movieData?.originalTitle}
+                defaultValue={movie?.originalTitle}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="tagline">Tagline</Label>
-            <Input
-              id="tagline"
-              name="tagline"
-              defaultValue={movieData?.tagline}
-            />
+            <Input id="tagline" name="tagline" defaultValue={movie?.tagline} />
           </div>
 
           <div className="space-y-2">
@@ -156,7 +153,7 @@ export function MovieDialog({
             <Input
               id="genres"
               name="genres"
-              defaultValue={movieData?.genres.join(", ")}
+              defaultValue={movie?.genres.join(", ")}
             />
           </div>
 
@@ -165,7 +162,7 @@ export function MovieDialog({
             <Textarea
               id="synopsis"
               name="synopsis"
-              defaultValue={movieData?.synopsis}
+              defaultValue={movie?.synopsis}
               className="h-20"
               maxLength={1000}
             />
@@ -178,7 +175,7 @@ export function MovieDialog({
                 type="number"
                 id="popularity"
                 name="popularity"
-                defaultValue={movieData?.popularity}
+                defaultValue={movie?.popularity}
                 step="0.1"
               />
             </div>
@@ -189,10 +186,8 @@ export function MovieDialog({
                 id="voteCount"
                 name="voteCount"
                 defaultValue={
-                  movieData?.voteCount
-                    ? movieData.voteCount
-                        .toLocaleString("en-US")
-                        .replace(/,/g, ".")
+                  movie?.voteCount
+                    ? movie.voteCount.toLocaleString("en-US").replace(/,/g, ".")
                     : ""
                 }
                 onChange={(e) => {
@@ -209,7 +204,7 @@ export function MovieDialog({
                 type="number"
                 id="score"
                 name="score"
-                defaultValue={movieData?.score}
+                defaultValue={movie?.score}
                 min="0"
                 max="100"
                 step="1"
@@ -221,7 +216,7 @@ export function MovieDialog({
                 type="date"
                 id="releaseDate"
                 name="releaseDate"
-                defaultValue={movieData?.releaseDate?.split("T")[0]}
+                defaultValue={movie?.releaseDate?.split("T")[0]}
                 onFocus={(e) => (e.target.type = "date")}
                 onBlur={(e) => {
                   e.target.type = "text";
@@ -241,24 +236,20 @@ export function MovieDialog({
                 type="number"
                 id="duration"
                 name="duration"
-                defaultValue={movieData?.duration}
+                defaultValue={movie?.duration}
                 min="1"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Input
-                id="status"
-                name="status"
-                defaultValue={movieData?.status}
-              />
+              <Input id="status" name="status" defaultValue={movie?.status} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="language">Language</Label>
               <Input
                 id="language"
                 name="language"
-                defaultValue={movieData?.language}
+                defaultValue={movie?.language}
               />
             </div>
           </div>
@@ -272,7 +263,7 @@ export function MovieDialog({
                 name="budget"
                 onChange={(e) => handleMoneyChange(e, setBudget)}
                 maxLength={15}
-                defaultValue={movieData?.budget}
+                defaultValue={movie?.budget}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(budget)}
@@ -289,7 +280,7 @@ export function MovieDialog({
                 name="revenue"
                 onChange={(e) => handleMoneyChange(e, setRevenue)}
                 maxLength={15}
-                defaultValue={movieData?.revenue}
+                defaultValue={movie?.revenue}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(revenue)}
@@ -306,7 +297,7 @@ export function MovieDialog({
                 name="profit"
                 onChange={(e) => handleMoneyChange(e, setProfit)}
                 maxLength={15}
-                defaultValue={movieData?.profit}
+                defaultValue={movie?.profit}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(profit)}
@@ -323,7 +314,7 @@ export function MovieDialog({
               id="trailerUrl"
               name="trailerUrl"
               type="url"
-              defaultValue={movieData?.trailerUrl}
+              defaultValue={movie?.trailerUrl}
             />
           </div>
 
