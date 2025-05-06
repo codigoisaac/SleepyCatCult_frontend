@@ -1,0 +1,23 @@
+export type Movie = {
+  id: number;
+  title: string;
+  originalTitle: string;
+  releaseDate: string;
+  synopsis: string;
+  coverImage: string;
+  budget: number;
+  duration: number;
+  score: number;
+  userId: number;
+  popularity: number;
+  voteCount: number;
+  tagline: string;
+  genres: string[];
+  status: string;
+  language: string;
+  revenue: number;
+  profit: number;
+  trailerUrl: string;
+  createdAt: string;
+  updatedAt: string;
+};

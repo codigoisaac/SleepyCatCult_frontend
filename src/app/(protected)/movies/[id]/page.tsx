@@ -1,8 +1,8 @@
-// src/app/(protected)/movies/[id]/page.tsx
 "use client";
 
+import { Movie } from "@/types/movie";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { format } from "date-fns";
 import { movieService } from "@/lib/api";
@@ -27,25 +27,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { UserNav } from "@/components/layout/user-nav";
 
-type Movie = {
-  id: string;
-  title: string;
-  originalTitle?: string;
-  releaseDate: string;
-  overview: string;
-  posterUrl?: string;
-  budget?: number;
-  runtime?: number;
-  score?: number;
-};
-
-export default function MovieDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { isAuthenticated } = useAuth();
+export default function MovieDetailPage() {
+  const { id: movieId } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const router = useRouter();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,14 +40,10 @@ export default function MovieDetailPage({
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
     const fetchMovie = async () => {
       try {
         setLoading(true);
-        const response = await movieService.getById(params.id);
+        const response = await movieService.getById(movieId);
         setMovie(response.data);
       } catch (error) {
         console.error("Error fetching movie:", error);
@@ -72,12 +55,12 @@ export default function MovieDetailPage({
     };
 
     fetchMovie();
-  }, [isAuthenticated, params.id, router]);
+  }, [movieId, router]);
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await movieService.delete(params.id);
+      await movieService.delete(movieId);
       toast.success("Movie deleted successfully");
       router.push("/movies");
     } catch (error) {
@@ -88,10 +71,6 @@ export default function MovieDetailPage({
       setDeleteDialogOpen(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   if (loading) {
     return (
@@ -121,7 +100,10 @@ export default function MovieDetailPage({
           <p className="text-muted-foreground mt-2">
             {`The movie you're looking for doesn't exist or has been removed.`}
           </p>
-          <Button className="mt-4" onClick={() => router.push("/movies")}>
+          <Button
+            className="mt-4 cursor-pointer"
+            onClick={() => router.push("/movies")}
+          >
             Back to Movies
           </Button>
         </div>
@@ -131,20 +113,26 @@ export default function MovieDetailPage({
 
   return (
     <div className="container mx-auto py-8">
-      <Button
-        variant="ghost"
-        className="mb-8 pl-0"
-        onClick={() => router.push("/movies")}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Movies
-      </Button>
+      <header className="flex justify-between items-center mb-8">
+        <Button
+          variant="ghost"
+          className="pl-0 cursor-pointer"
+          onClick={() => router.push("/movies")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Movies
+        </Button>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          {user && <UserNav user={user} />}
+        </div>
+      </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="aspect-[2/3] relative bg-muted rounded-lg overflow-hidden">
-          {movie.posterUrl ? (
+          {movie.coverImage ? (
             <Image
-              src={movie.posterUrl}
+              src={movie.coverImage}
               alt={movie.title}
               fill
               className="object-cover"
@@ -165,6 +153,7 @@ export default function MovieDetailPage({
               <Button
                 variant="outline"
                 size="sm"
+                className="cursor-pointer"
                 onClick={() => router.push(`/movies/edit/${movie.id}`)}
               >
                 <Pencil className="h-4 w-4 mr-2" />
@@ -173,6 +162,7 @@ export default function MovieDetailPage({
               <Button
                 variant="destructive"
                 size="sm"
+                className="cursor-pointer"
                 onClick={() => setDeleteDialogOpen(true)}
               >
                 <Trash className="h-4 w-4 mr-2" />
@@ -193,10 +183,10 @@ export default function MovieDetailPage({
               {format(new Date(movie.releaseDate), "MMMM d, yyyy")}
             </div>
 
-            {movie.runtime && (
+            {movie.duration && (
               <div className="flex items-center text-sm">
                 <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                {movie.runtime} min
+                {movie.duration} min
               </div>
             )}
 
@@ -224,7 +214,7 @@ export default function MovieDetailPage({
 
           <h2 className="text-xl font-semibold mb-2">Overview</h2>
           <p className="text-muted-foreground whitespace-pre-line">
-            {movie.overview}
+            {movie.synopsis}
           </p>
         </div>
       </div>
@@ -243,6 +233,7 @@ export default function MovieDetailPage({
           <DialogFooter>
             <Button
               variant="outline"
+              className="cursor-pointer"
               onClick={() => setDeleteDialogOpen(false)}
               disabled={isDeleting}
             >
@@ -250,6 +241,7 @@ export default function MovieDetailPage({
             </Button>
             <Button
               variant="destructive"
+              className="cursor-pointer"
               onClick={handleDelete}
               disabled={isDeleting}
             >
