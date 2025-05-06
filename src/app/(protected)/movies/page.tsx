@@ -105,11 +105,11 @@ export default function MoviesPage() {
           if (response.data.totalPages) {
             setTotalPages(response.data.totalPages);
           } else {
-            // Assuming 10 per page if not provided
+            // Assuming 12 per page if not provided
             const total = Array.isArray(response.data)
               ? response.data.length
               : 0;
-            setTotalPages(Math.ceil(total / 10));
+            setTotalPages(Math.ceil(total / 12));
           }
         } else {
           console.error("Unexpected response format:", response.data);
@@ -210,7 +210,7 @@ export default function MoviesPage() {
                               value={field.value || ""}
                               onChange={(e) =>
                                 field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
+                                  e.target.value ? Number(e.target.value) : "",
                                 )
                               }
                             />
@@ -236,7 +236,7 @@ export default function MoviesPage() {
                               value={field.value || ""}
                               onChange={(e) =>
                                 field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
+                                  e.target.value ? Number(e.target.value) : "",
                                 )
                               }
                             />
@@ -293,7 +293,7 @@ export default function MoviesPage() {
                               value={field.value || ""}
                               onChange={(e) =>
                                 field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
+                                  e.target.value ? Number(e.target.value) : "",
                                 )
                               }
                             />
@@ -316,7 +316,7 @@ export default function MoviesPage() {
                               value={field.value || ""}
                               onChange={(e) =>
                                 field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
+                                  e.target.value ? Number(e.target.value) : "",
                                 )
                               }
                             />
@@ -351,7 +351,7 @@ export default function MoviesPage() {
 
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {Array.from({ length: 12 }).map((_, index) => (
             <div
               key={index}
               className="h-[350px] rounded-lg bg-muted animate-pulse"

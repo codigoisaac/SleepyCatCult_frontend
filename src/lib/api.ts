@@ -27,7 +27,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Interceptor de resposta para tratar erros de autenticação
@@ -36,13 +36,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Verifica se é um erro 401 (Unauthorized)
-    if (error.response?.status === 401) {
+    // Verifica se é um erro 401 (Unauthorized) E se existe um token
+    if (error.response?.status === 401 && Cookies.get("token")) {
       // Remove o token
       Cookies.remove("token");
       delete api.defaults.headers.common["Authorization"];
 
-      // Mostra um toast de sessão expirada que permanece até o usuário fechar
       toast.error("Sua sessão expirou. Por favor, faça login novamente.", {
         duration: 7000,
         id: "session-expired", // ID único para evitar toasts duplicados
@@ -54,7 +53,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 interface MovieFilters {
@@ -85,7 +84,7 @@ export const movieService = {
 
     const cleanedParams = Object.fromEntries(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(mappedFilters).filter(([_, v]) => v !== undefined)
+      Object.entries(mappedFilters).filter(([_, v]) => v !== undefined),
     );
 
     return api
