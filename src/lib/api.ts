@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { toast } from "react-hot-toast";
 import { MovieForm } from "@/types/movie";
 
-// Vamos criar uma função para lidar com o logout que será usada pelo interceptor
 let logoutFunction: (() => void) | null = null;
 
 export const setLogoutFunction = (fn: () => void) => {
@@ -69,8 +68,41 @@ interface MovieFilters {
   paginationPerPage?: number;
 }
 
+const errorMessageSuffix =
+  "Please check the data you are sending and if the error persists, send us a message at meow@sleepycat.cult";
+
+function showErrorMessage(errorPrefix: string) {
+  toast.error(`${errorPrefix}. ${errorMessageSuffix}`);
+}
+
+export const authService = {
+  register: async ({
+    name,
+    email,
+    password,
+  }: {
+    name: string;
+    email: string;
+    password: string;
+  }) => api.post("/auth/register", { name, email, password }),
+
+  login: async ({ email, password }: { email: string; password: string }) =>
+    api
+      .post("/auth/login", { email, password })
+      .then((response) => {
+        toast.success("You're in the Cult! Enjoy! 🐈");
+        return response;
+      })
+      .catch((error) => {
+        showErrorMessage("Error letting you in the Cult.");
+        return Promise.reject(error);
+      }),
+};
+
+//! alternate to receive objects
 export const movieService = {
-  getAll: (filters: MovieFilters = {}) => {
+  //! include toast messages
+  getAll: async (filters: MovieFilters = {}) => {
     const mappedFilters = {
       durationMin: filters.durationMin || undefined,
       durationMax: filters.durationMax || undefined,
@@ -106,11 +138,30 @@ export const movieService = {
         return response;
       });
   },
-  getById: (id: string | number) => api.get(`/movies/${id}`),
-  create: (data: MovieForm) => api.post("/movies", data),
-  update: (id: string | number, data: MovieForm) =>
-    api.patch(`/movies/${id}`, data),
-  delete: (id: string | number) => api.delete(`/movies/${id}`),
+  getById: async (id: string | number) => api.get(`/movies/${id}`),
+  create: (data: MovieForm) =>
+    api
+      .post("/movies", data)
+      .then((response) => {
+        toast.success("Movie created. Thank you!");
+        return response;
+      })
+      .catch((error) => {
+        showErrorMessage("Error creating the movie.");
+        return Promise.reject(error);
+      }),
+  update: async (id: string | number, data: MovieForm) =>
+    api
+      .patch(`/movies/${id}`, data)
+      .then((response) => {
+        toast.success("Movie updated with success!");
+        return response;
+      })
+      .catch((error) => {
+        showErrorMessage("Error updating the movie.");
+        return Promise.reject(error);
+      }),
+  delete: async (id: string | number) => api.delete(`/movies/${id}`),
 };
 
 export default api;

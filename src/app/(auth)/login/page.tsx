@@ -101,7 +101,11 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button className="w-full" type="submit" disabled={isLoading}>
+              <Button
+                className="w-full cursor-pointer"
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>

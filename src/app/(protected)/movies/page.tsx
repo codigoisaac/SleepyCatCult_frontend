@@ -37,7 +37,7 @@ import { z } from "zod";
 type FilterFormValues = z.infer<typeof filterSchema>;
 
 export default function MoviesPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,9 +122,21 @@ export default function MoviesPage() {
     <div className="container mx-auto py-6">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Sleepy Cat Cult</h1>
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-          {user && <UserNav user={user} />}
+
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="cursor-pointer"
+            onClick={() => logout()}
+          >
+            <small>Logout</small>
+          </Button>
+
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            {user && <UserNav user={user} />}
+          </div>
         </div>
       </header>
 
