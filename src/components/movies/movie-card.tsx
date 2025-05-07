@@ -2,18 +2,7 @@ import Image from "next/image";
 import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-type MovieCardProps = {
-  movie: {
-    id: number;
-    title: string;
-    releaseDate: string;
-    coverImage: string;
-    score: number;
-    duration: number;
-  };
-  onClick: () => void;
-};
+import { Movie } from "@/types/movie";
 
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
@@ -21,16 +10,22 @@ function formatDuration(minutes: number): string {
   return `${hours}h${remainingMinutes.toString().padStart(2, "0")}m`;
 }
 
-export function MovieCard({ movie, onClick }: MovieCardProps) {
+export function MovieCard({
+  movie,
+  onClick,
+}: {
+  movie: Movie;
+  onClick: () => void;
+}) {
   return (
     <Card
       className="overflow-hidden transition-shadow hover:shadow-lg cursor-pointer h-full flex flex-col"
       onClick={onClick}
     >
       <div className="relative aspect-[2/3] w-full bg-muted">
-        {movie.coverImage ? (
+        {movie.coverImageUrl ? (
           <Image
-            src={movie.coverImage}
+            src={movie.coverImageUrl}
             alt={movie.title}
             fill
             className="object-cover"

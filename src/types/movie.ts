@@ -20,7 +20,7 @@ export type MovieForm = {
 export type Movie = MovieForm & {
   id: number;
   userId: number;
-  coverImage: string;
+  coverImageUrl: string;
   createdAt: string;
   updatedAt: string;
 };

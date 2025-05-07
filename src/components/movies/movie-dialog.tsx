@@ -12,10 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-
 import { movieService } from "@/lib/api";
 import { Movie, MovieForm } from "@/types/movie";
+import { useState } from "react";
+import { CoverInput } from "./MovieCoverInput";
 
 interface MovieDialogProps {
   open: boolean;
@@ -36,6 +36,7 @@ export function MovieDialog({
   const [budget, setBudget] = useState(movie?.budget?.toString() || "");
   const [revenue, setRevenue] = useState(movie?.revenue?.toString() || "");
   const [profit, setProfit] = useState(movie?.profit?.toString() || "");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const handleMoneyChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -50,6 +51,10 @@ export function MovieDialog({
     setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
+
+      if (coverFile) {
+        //! formData.append("cover", coverFile);
+      }
 
       const data: MovieForm = {
         title: formData.get("title")?.toString() || "",
@@ -75,8 +80,10 @@ export function MovieDialog({
 
       if (mode === "create") {
         await movieService.create(data);
+        //! await movieService.create(data, coverFile);
       } else {
         const updatedMovie = await movieService.update(movie!.id, data);
+        //! const updatedMovie = await movieService.update(movie!.id, data, coverFile);
         setMovie?.(updatedMovie.data);
       }
 
@@ -95,46 +102,65 @@ export function MovieDialog({
           <DialogTitle>
             {mode === "create" ? "Add Movie" : "Edit Movie"}
           </DialogTitle>
+
           <DialogDescription>
             {mode === "create"
               ? "Add a new movie to the database."
               : "Make changes to the movie information below."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
-                defaultValue={movie?.title}
-                required={mode === "create"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="originalTitle">Original Title</Label>
-              <Input
-                id="originalTitle"
-                name="originalTitle"
-                defaultValue={movie?.originalTitle}
-                required={mode === "create"}
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tagline">Tagline</Label>
-            <Input
-              id="tagline"
-              name="tagline"
-              defaultValue={movie?.tagline}
-              required={mode === "create"}
-            />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-1">
+              <CoverInput
+                defaultValue={movie?.coverImageUrl}
+                onChange={setCoverFile}
+                required={mode === "create"}
+              />
+            </div>
+
+            <div className="col-span-2 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+
+                  <Input
+                    id="title"
+                    name="title"
+                    defaultValue={movie?.title}
+                    required={mode === "create"}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="originalTitle">Original Title</Label>
+
+                  <Input
+                    id="originalTitle"
+                    name="originalTitle"
+                    defaultValue={movie?.originalTitle}
+                    required={mode === "create"}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tagline">Tagline</Label>
+
+                <Input
+                  id="tagline"
+                  name="tagline"
+                  defaultValue={movie?.tagline}
+                  required={mode === "create"}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="genres">Genres (comma-separated)</Label>
+
             <Input
               id="genres"
               name="genres"
@@ -145,6 +171,7 @@ export function MovieDialog({
 
           <div className="space-y-2">
             <Label htmlFor="synopsis">Synopsis</Label>
+
             <Textarea
               id="synopsis"
               name="synopsis"
@@ -158,6 +185,7 @@ export function MovieDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="popularity">Popularity</Label>
+
               <Input
                 type="number"
                 id="popularity"
@@ -167,8 +195,10 @@ export function MovieDialog({
                 required={mode === "create"}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="voteCount">Vote Count</Label>
+
               <Input
                 type="text"
                 id="voteCount"
@@ -177,8 +207,10 @@ export function MovieDialog({
                 required={mode === "create"}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="score">Score (0-100)</Label>
+
               <Input
                 type="number"
                 id="score"
@@ -190,8 +222,10 @@ export function MovieDialog({
                 required={mode === "create"}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="releaseDate">Release Date</Label>
+
               <Input
                 type="date"
                 id="releaseDate"
@@ -205,6 +239,7 @@ export function MovieDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="duration">Duration (minutes)</Label>
+
               <Input
                 type="number"
                 id="duration"
@@ -214,8 +249,10 @@ export function MovieDialog({
                 required={mode === "create"}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
+
               <Input
                 id="status"
                 name="status"
@@ -223,8 +260,10 @@ export function MovieDialog({
                 required={mode === "create"}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="language">Language</Label>
+
               <Input
                 id="language"
                 name="language"
@@ -237,6 +276,7 @@ export function MovieDialog({
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="budget">Budget</Label>
+
               <Input
                 type="text"
                 id="budget"
@@ -246,15 +286,19 @@ export function MovieDialog({
                 defaultValue={movie?.budget}
                 required={mode === "create"}
               />
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(budget)}
               </p>
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyToWords(Number(budget || 0))}
               </p>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="revenue">Revenue</Label>
+
               <Input
                 type="text"
                 id="revenue"
@@ -264,15 +308,19 @@ export function MovieDialog({
                 defaultValue={movie?.revenue}
                 required={mode === "create"}
               />
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(revenue)}
               </p>
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyToWords(Number(revenue || 0))}
               </p>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="profit">Profit</Label>
+
               <Input
                 type="text"
                 id="profit"
@@ -282,9 +330,11 @@ export function MovieDialog({
                 defaultValue={movie?.profit}
                 required={mode === "create"}
               />
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(profit)}
               </p>
+
               <p className="text-sm text-muted-foreground">
                 {formatMoneyToWords(Number(profit || 0))}
               </p>
@@ -293,6 +343,7 @@ export function MovieDialog({
 
           <div className="space-y-2">
             <Label htmlFor="trailerUrl">Trailer URL</Label>
+
             <Input
               id="trailerUrl"
               name="trailerUrl"
@@ -312,6 +363,7 @@ export function MovieDialog({
             >
               Cancel
             </Button>
+
             <Button
               type="submit"
               disabled={isSubmitting}

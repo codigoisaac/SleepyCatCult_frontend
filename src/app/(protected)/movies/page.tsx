@@ -1,14 +1,5 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
-import { movieService } from "@/lib/api";
-import { filterSchema } from "@/lib/validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Filter, Plus, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-
 import { UserNav } from "@/components/layout/user-nav";
 import { MovieCard } from "@/components/movies/movie-card";
 import { MovieDialog } from "@/components/movies/movie-dialog";
@@ -31,7 +22,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { movieService } from "@/lib/api";
+import { filterSchema } from "@/lib/validation";
 import { Movie } from "@/types/movie";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Filter, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { z } from "zod";
 
 type FilterFormValues = z.infer<typeof filterSchema>;
@@ -128,7 +128,15 @@ export default function MoviesPage() {
             variant="ghost"
             size="sm"
             className="cursor-pointer"
-            onClick={() => logout()}
+            onClick={() => {
+              toast(
+                "You may leave the Cult, but the Cult will never leave you.",
+                {
+                  icon: "🐈‍⬛",
+                },
+              );
+              logout();
+            }}
           >
             <small>Logout</small>
           </Button>

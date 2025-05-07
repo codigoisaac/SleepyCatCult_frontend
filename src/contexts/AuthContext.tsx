@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import api, { setLogoutFunction, authService } from "@/lib/api";
 import Cookies from "js-cookie";
-import toast from "react-hot-toast";
 
 type User = {
   id: string;
@@ -39,9 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Cookies.remove("token");
     setUser(null);
     delete api.defaults.headers.common["Authorization"];
-    toast("You may leave the Cult, but the Cult will never leave you.", {
-      icon: "🐈‍⬛",
-    });
     router.push("/login");
   }, [router]);
 

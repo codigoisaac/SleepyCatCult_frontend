@@ -132,9 +132,9 @@ export default function MovieDetailPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="aspect-[2/3] relative bg-muted rounded-lg overflow-hidden">
-          {movie.coverImage ? (
+          {movie.coverImageUrl ? (
             <Image
-              src={movie.coverImage}
+              src={movie.coverImageUrl}
               alt={movie.title}
               fill
               className="object-cover"

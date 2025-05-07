@@ -131,7 +131,7 @@ export const movieService = {
             ...response,
             data: {
               movies: response.data,
-              totalPages: Math.ceil(response.data.length / 10), // Assuming 10 per page
+              totalPages: Math.ceil(response.data.length / 12), //! must come from API
             },
           };
         }
