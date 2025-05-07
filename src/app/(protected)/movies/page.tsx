@@ -68,11 +68,7 @@ export default function MoviesPage() {
           ...activeFilters,
         });
 
-        // Check if response.data contains movies directly or nested
-        // Handle both cases: response.data.movies or response.data as the array
-        const moviesData = Array.isArray(response.data)
-          ? response.data
-          : response.data.movies;
+        const moviesData = response.data;
 
         if (Array.isArray(moviesData)) {
           setMovies(moviesData);
@@ -123,7 +119,7 @@ export default function MoviesPage() {
   return (
     <div className="container mx-auto py-6">
       <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Cubos Movies</h1>
+        <h1 className="text-3xl font-bold">Sleepy Cat Cult</h1>
         <div className="flex items-center gap-4">
           <ThemeToggle />
           {user && <UserNav user={user} />}
@@ -142,7 +138,7 @@ export default function MoviesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Button type="submit" size="icon">
+          <Button type="submit" size="icon" className="cursor-pointer">
             <Search className="h-4 w-4" />
           </Button>
         </form>
@@ -151,7 +147,7 @@ export default function MoviesPage() {
         <div className="flex gap-2">
           <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="cursor-pointer">
                 <Filter className="h-4 w-4 mr-2" />
                 Filtrar
               </Button>
@@ -318,7 +314,10 @@ export default function MoviesPage() {
             </DialogContent>
           </Dialog>
 
-          <Button onClick={() => router.push("/movies/add")}>
+          <Button
+            onClick={() => router.push("/movies/add")}
+            className="cursor-pointer"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Movie
           </Button>
