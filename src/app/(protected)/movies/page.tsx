@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { movieService } from "@/lib/api";
 import { filterSchema } from "@/lib/validation";
-import { Search, Filter, Plus } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Filter, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import { UserNav } from "@/components/layout/user-nav";
+import { MovieCard } from "@/components/movies/movie-card";
+import { MovieDialog } from "@/components/movies/movie-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -26,12 +28,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { MovieCard } from "@/components/movies/movie-card";
+import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
-import { UserNav } from "@/components/layout/user-nav";
-import { z } from "zod";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Movie } from "@/types/movie";
+import { z } from "zod";
 
 type FilterFormValues = z.infer<typeof filterSchema>;
 
@@ -45,6 +46,7 @@ export default function MoviesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterFormValues>({});
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const filterForm = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
@@ -68,7 +70,7 @@ export default function MoviesPage() {
           ...activeFilters,
         });
 
-        const moviesData = response.data;
+        const moviesData = response.data.movies;
 
         if (Array.isArray(moviesData)) {
           setMovies(moviesData);
@@ -315,12 +317,18 @@ export default function MoviesPage() {
           </Dialog>
 
           <Button
-            onClick={() => router.push("/movies/add")}
+            onClick={() => setCreateDialogOpen(true)}
             className="cursor-pointer"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Movie
           </Button>
+
+          <MovieDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
+            mode="create"
+          />
         </div>
       </div>
 

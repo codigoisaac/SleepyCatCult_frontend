@@ -1,23 +1,25 @@
 "use client";
 
-import { Movie } from "@/types/movie";
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
-import { format } from "date-fns";
-import { movieService } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "react-hot-toast";
+import { movieService } from "@/lib/api";
+import { Movie } from "@/types/movie";
+import { format } from "date-fns";
 import {
   ArrowLeft,
-  Pencil,
-  Trash,
-  Star,
   Calendar,
   Clock,
   DollarSign,
+  Pencil,
+  Star,
+  Trash,
 } from "lucide-react";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
+import { UserNav } from "@/components/layout/user-nav";
+import { MovieDialog } from "@/components/movies/movie-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,8 +30,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { UserNav } from "@/components/layout/user-nav";
-import { MovieDialog } from "@/components/movies/movie-dialog";
 
 export default function MovieDetailPage() {
   const { id: movieId } = useParams<{ id: string }>();

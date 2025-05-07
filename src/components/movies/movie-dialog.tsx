@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 import { movieService } from "@/lib/api";
 import { Movie, MovieForm } from "@/types/movie";
@@ -23,27 +23,6 @@ interface MovieDialogProps {
   movie?: Movie;
   setMovie?: (movie: Movie) => void;
   mode: "create" | "edit";
-}
-
-function formatMoneyToWords(amount: number): string {
-  if (!amount) return "";
-
-  const billion = 1000000000;
-  const million = 1000000;
-  const thousand = 1000;
-
-  if (amount >= billion) {
-    const billions = Math.floor(amount / billion);
-    return `${billions} billion + dollars`;
-  } else if (amount >= million) {
-    const millions = Math.floor(amount / million);
-    return `${millions} million + dollars`;
-  } else if (amount >= thousand) {
-    const thousands = Math.floor(amount / thousand);
-    return `${thousands} thousand + dollars`;
-  }
-
-  return `${amount} dollars`;
 }
 
 export function MovieDialog({
@@ -130,7 +109,7 @@ export function MovieDialog({
                 id="title"
                 name="title"
                 defaultValue={movie?.title}
-                required
+                required={mode === "create"}
               />
             </div>
             <div className="space-y-2">
@@ -139,13 +118,19 @@ export function MovieDialog({
                 id="originalTitle"
                 name="originalTitle"
                 defaultValue={movie?.originalTitle}
+                required={mode === "create"}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="tagline">Tagline</Label>
-            <Input id="tagline" name="tagline" defaultValue={movie?.tagline} />
+            <Input
+              id="tagline"
+              name="tagline"
+              defaultValue={movie?.tagline}
+              required={mode === "create"}
+            />
           </div>
 
           <div className="space-y-2">
@@ -154,6 +139,7 @@ export function MovieDialog({
               id="genres"
               name="genres"
               defaultValue={movie?.genres.join(", ")}
+              required={mode === "create"}
             />
           </div>
 
@@ -165,6 +151,7 @@ export function MovieDialog({
               defaultValue={movie?.synopsis}
               className="h-20"
               maxLength={1000}
+              required={mode === "create"}
             />
           </div>
 
@@ -177,6 +164,7 @@ export function MovieDialog({
                 name="popularity"
                 defaultValue={movie?.popularity}
                 step="0.1"
+                required={mode === "create"}
               />
             </div>
             <div className="space-y-2">
@@ -185,17 +173,8 @@ export function MovieDialog({
                 type="text"
                 id="voteCount"
                 name="voteCount"
-                defaultValue={
-                  movie?.voteCount
-                    ? movie.voteCount.toLocaleString("en-US").replace(/,/g, ".")
-                    : ""
-                }
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  e.target.value = value
-                    ? parseInt(value).toLocaleString("en-US").replace(/,/g, ".")
-                    : "";
-                }}
+                defaultValue={movie?.voteCount}
+                required={mode === "create"}
               />
             </div>
             <div className="space-y-2">
@@ -208,6 +187,7 @@ export function MovieDialog({
                 min="0"
                 max="100"
                 step="1"
+                required={mode === "create"}
               />
             </div>
             <div className="space-y-2">
@@ -217,14 +197,7 @@ export function MovieDialog({
                 id="releaseDate"
                 name="releaseDate"
                 defaultValue={movie?.releaseDate?.split("T")[0]}
-                onFocus={(e) => (e.target.type = "date")}
-                onBlur={(e) => {
-                  e.target.type = "text";
-                  if (e.target.value) {
-                    const date = new Date(e.target.value);
-                    e.target.value = date.toLocaleDateString("en-US");
-                  }
-                }}
+                required={mode === "create"}
               />
             </div>
           </div>
@@ -238,11 +211,17 @@ export function MovieDialog({
                 name="duration"
                 defaultValue={movie?.duration}
                 min="1"
+                required={mode === "create"}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Input id="status" name="status" defaultValue={movie?.status} />
+              <Input
+                id="status"
+                name="status"
+                defaultValue={movie?.status}
+                required={mode === "create"}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="language">Language</Label>
@@ -250,6 +229,7 @@ export function MovieDialog({
                 id="language"
                 name="language"
                 defaultValue={movie?.language}
+                required={mode === "create"}
               />
             </div>
           </div>
@@ -264,6 +244,7 @@ export function MovieDialog({
                 onChange={(e) => handleMoneyChange(e, setBudget)}
                 maxLength={15}
                 defaultValue={movie?.budget}
+                required={mode === "create"}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(budget)}
@@ -281,6 +262,7 @@ export function MovieDialog({
                 onChange={(e) => handleMoneyChange(e, setRevenue)}
                 maxLength={15}
                 defaultValue={movie?.revenue}
+                required={mode === "create"}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(revenue)}
@@ -298,6 +280,7 @@ export function MovieDialog({
                 onChange={(e) => handleMoneyChange(e, setProfit)}
                 maxLength={15}
                 defaultValue={movie?.profit}
+                required={mode === "create"}
               />
               <p className="text-sm text-muted-foreground">
                 {formatMoneyDisplay(profit)}
@@ -315,6 +298,7 @@ export function MovieDialog({
               name="trailerUrl"
               type="url"
               defaultValue={movie?.trailerUrl}
+              required={mode === "create"}
             />
           </div>
 
@@ -354,3 +338,24 @@ const formatMoneyDisplay = (value: string) => {
     maximumFractionDigits: 2,
   })}`;
 };
+
+function formatMoneyToWords(amount: number): string {
+  if (!amount) return "";
+
+  const billion = 1000000000;
+  const million = 1000000;
+  const thousand = 1000;
+
+  if (amount >= billion) {
+    const billions = Math.floor(amount / billion);
+    return `${billions} billion + dollars`;
+  } else if (amount >= million) {
+    const millions = Math.floor(amount / million);
+    return `${millions} million + dollars`;
+  } else if (amount >= thousand) {
+    const thousands = Math.floor(amount / thousand);
+    return `${thousands} thousand + dollars`;
+  }
+
+  return `${amount} dollars`;
+}
