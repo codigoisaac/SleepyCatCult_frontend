@@ -140,6 +140,7 @@ export default function MoviesPage() {
         </div>
       </header>
 
+      {/* Search and filter */}
       <div className="flex justify-between items-center mb-6">
         {/* Search */}
         <form
@@ -355,6 +356,7 @@ export default function MoviesPage() {
         </div>
       ) : movies?.length > 0 ? (
         <>
+          {/* Movies list */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {movies.map((movie) => (
               <MovieCard
@@ -365,6 +367,7 @@ export default function MoviesPage() {
             ))}
           </div>
 
+          {/* Pagination */}
           <div className="mt-8 flex justify-center">
             <Pagination
               currentPage={currentPage}
@@ -374,11 +377,12 @@ export default function MoviesPage() {
           </div>
         </>
       ) : (
+        // When there are no movies
         <div className="text-center py-16">
           <h2 className="text-2xl font-medium">No movies found</h2>
+
           <p className="text-muted-foreground mt-2">
-            Try adjusting your search or filters to find what you&apos;re
-            looking for.
+            {`Wait, the cult can't be empty. Add a movie to get started!`}
           </p>
         </div>
       )}
