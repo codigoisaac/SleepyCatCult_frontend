@@ -4,12 +4,13 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
+import NavBar from "@/components/layout/NavBar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Cubos Movies",
-  description: "A movie catalog application",
+  title: "Sleepy Cat Cult",
+  description: "A cult movie catalog application... for sleepy cultist cats.",
 };
 
 export default function RootLayout({
@@ -27,7 +28,12 @@ export default function RootLayout({
         >
           <AuthProvider>
             <Toaster position="top-right" />
-            {children}
+
+            <div className="container mx-auto p-6">
+              <NavBar />
+
+              {children}
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>

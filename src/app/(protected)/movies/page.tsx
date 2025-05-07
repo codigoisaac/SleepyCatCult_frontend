@@ -1,8 +1,6 @@
 "use client";
 
-import { UserNav } from "@/components/layout/user-nav";
 import { MovieCard } from "@/components/movies/movie-card";
-import { MovieDialog } from "@/components/movies/movie-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,8 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { useAuth } from "@/contexts/AuthContext";
 import { movieService } from "@/lib/api";
 import { filterSchema } from "@/lib/validation";
 import { Movie } from "@/types/movie";
@@ -31,13 +27,11 @@ import { Filter, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import { z } from "zod";
 
 type FilterFormValues = z.infer<typeof filterSchema>;
 
 export default function MoviesPage() {
-  const { user, logout } = useAuth();
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +40,6 @@ export default function MoviesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterFormValues>({});
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const filterForm = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
@@ -119,35 +112,7 @@ export default function MoviesPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Sleepy Cat Cult</h1>
-
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="cursor-pointer"
-            onClick={() => {
-              toast(
-                "You may leave the Cult, but the Cult will never leave you.",
-                {
-                  icon: "🐈‍⬛",
-                },
-              );
-              logout();
-            }}
-          >
-            <small>Logout</small>
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            {user && <UserNav user={user} />}
-          </div>
-        </div>
-      </header>
-
+    <>
       {/* Search and filter */}
       <div className="flex justify-between items-center mb-6">
         {/* Search */}
@@ -157,7 +122,7 @@ export default function MoviesPage() {
         >
           <Input
             type="search"
-            placeholder="Procurar filmes..."
+            placeholder="Search movies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -166,17 +131,17 @@ export default function MoviesPage() {
           </Button>
         </form>
 
-        {/* Filter button */}
+        {/* Filter and Add */}
         <div className="flex gap-2">
           <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="cursor-pointer">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtrar
+                <Filter className="h-4 w-4" />
+                Filter
               </Button>
             </DialogTrigger>
 
-            {/* Dialog content */}
+            {/* Filter dialog */}
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Filtrar filmes</DialogTitle>
@@ -338,18 +303,12 @@ export default function MoviesPage() {
           </Dialog>
 
           <Button
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={() => router.push("/movies/add")}
             className="cursor-pointer"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Add Movie
           </Button>
-
-          <MovieDialog
-            open={createDialogOpen}
-            onOpenChange={setCreateDialogOpen}
-            mode="create"
-          />
         </div>
       </div>
 
@@ -365,7 +324,7 @@ export default function MoviesPage() {
       ) : movies?.length > 0 ? (
         <>
           {/* Movies list */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {movies.map((movie) => (
               <MovieCard
                 key={movie.id}
@@ -394,6 +353,6 @@ export default function MoviesPage() {
           </p>
         </div>
       )}
-    </div>
+    </>
   );
 }

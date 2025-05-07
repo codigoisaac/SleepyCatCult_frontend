@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Cubos Movies</h1>
+        <h1 className="text-3xl font-bold mb-4">Sleepy Cat Cult</h1>
         <div className="animate-pulse">Loading...</div>
       </div>
     </div>
